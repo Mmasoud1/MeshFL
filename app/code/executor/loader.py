@@ -2,6 +2,7 @@ import sqlite3
 import torch
 import zlib
 import numpy as np
+# from torchvision import transforms
 
 class Scanloader(torch.utils.data.Dataset):
     def __init__(self, db_file, label_type='label', num_cubes=1):
@@ -14,6 +15,13 @@ class Scanloader(torch.utils.data.Dataset):
         self.data = self.cursor.fetchall()
         self.len = len(self.data)
         self.num_cubes = num_cubes
+
+        # # Augmentation: Random rotations and flips
+        # self.augmentation = transforms.Compose([
+        #     transforms.RandomHorizontalFlip(),
+        #     transforms.RandomVerticalFlip(),
+        #     transforms.RandomRotation(degrees=30)  # You can adjust the degree range
+        # ])        
 
     def __len__(self):
         return self.len
@@ -39,13 +47,26 @@ class Scanloader(torch.utils.data.Dataset):
         sample = self.data[idx]
         image = zlib.decompress(sample[0])
         image_tensor = torch.from_numpy(np.copy(np.frombuffer(image, dtype=np.float32)).reshape((256, 256, 256)))
+
+        # # Apply data augmentation to image and label
+        # image_tensor = self.augmentation(image_tensor)        
+
+        # Normalize image tensor
+        image_tensor = (image_tensor - image_tensor.min()) / (image_tensor.max() - image_tensor.min())
+
         label = zlib.decompress(sample[1])
         label_tensor = torch.from_numpy(np.copy(np.frombuffer(label, dtype=np.float32)).reshape((256, 256, 256)))
-        return self.divide_into_sub_cubes(image_tensor.to(self.device)), self.divide_into_sub_cubes(label_tensor.to(self.device))
+
+
+
+
+        # return self.divide_into_sub_cubes(image_tensor.to(self.device)), self.divide_into_sub_cubes(label_tensor.to(self.device))
+        return image_tensor.unsqueeze(0).to(self.device), label_tensor.unsqueeze(0).to(self.device)
+
       
     def split_dataset(self):
-        train_size = int(0.7 * self.len)
-        valid_size = int(0.2 * self.len)
+        train_size = int(0.75 * self.len)
+        valid_size = int(0.15 * self.len)
         train_data, valid_data, infer_data = torch.utils.data.random_split(self, [train_size, valid_size, self.len - train_size - valid_size])
         return train_data, valid_data, infer_data
 
