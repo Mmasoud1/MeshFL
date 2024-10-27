@@ -74,21 +74,24 @@ class MeshNetExecutor(Executor):
         for param in self.model.parameters():
             param.requires_grad = True
 
+
+        self.learning_rate = 0.0001    #<<<<<<<<<<<<<<<<<<<<<<<<
+
         # Optimizer and criterion setup
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.0003) #<<<<<<<<
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate) 
         self.criterion = torch.nn.CrossEntropyLoss()
 
         # Add learning rate scheduler ( Overlook for now)     <<<<<<<<<<
         # This will reduce the learning rate by a factor of 0.1 if the validation loss does not improve for 5 epochs.
         self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='min', factor=0.1, patience=5, verbose=True)
 
-
+        
 
 
         self.current_epoch = 0
 
         # Epochs and aggregation interval
-        self.total_epochs = 30  # Set the total number of epochs          #<<<<<<<<
+        self.total_epochs = 30  # Set the total number of epochs          #<<<<<<<<<<<<<<<<<<<<<<<<
         # self.aggregation_interval = 1  # Aggregation occurs every 5 epochs (you can modify this)
 
         self.dice_threshold = 0.9  # Set the Dice score threshold
@@ -103,6 +106,10 @@ class MeshNetExecutor(Executor):
 
         # Initialization flag for data loader
         self.data_loader_initialized = False
+
+        self.log_image_label_shapes_once = True  # Flag to log tensor shapes only once
+
+        self.log_shapes_once = True  # Flag to log tensor shapes only once
 
     def set_seed(self, seed):
         # Set the random seed for reproducibility
@@ -151,10 +158,17 @@ class MeshNetExecutor(Executor):
             self.data_loader = Scanloader(db_file=db_file_path, label_type='GWlabels', num_cubes=1)
             self.trainloader, self.validloader, self.testloader = self.data_loader.get_loaders(batch_size=1)
             
+            self.shape = 256
+            self.current_iteration = 0
+
+            self.train_size = len(self.trainloader)
+            self.iterations = self.total_epochs * self.train_size
 
             # Set flag to True so the loader is only initialized once
             self.data_loader_initialized = True
             self.logger.log_message(f"Data loader initialized for site {self.site_name}")
+            self.logger.log_message(f"Train size :{self.train_size} samples, Valid size: {len(self.validloader)} samples")
+            self.logger.log_message(f"Total epochs: {self.total_epochs}, Total iterations: {self.iterations}, lr: {self.learning_rate}")
 
 
         if task_name == "train_and_get_gradients":
@@ -294,22 +308,66 @@ class MeshNetExecutor(Executor):
 
 
     def train_and_get_gradients(self):
+        # Set the model to training mode, so dropout is activated
+        # and BatchNorm normalizes the input based on the statistics of the current mini-batch.
         self.model.train()
 
         # Initialize accumulators for the loss and gradients
         total_loss = 0.0
-        # gradient_accumulator = [torch.zeros_like(param).to(self.device) for param in self.model.parameters()]
 
         # Training loop for one epoch (full pass through the dataset)
+
         for batch_id, (image, label) in enumerate(self.trainloader):
+
+            # Moving data to the correct device (CPU or GPU)
             image, label = image.to(self.device), label.to(self.device)
-            self.optimizer.zero_grad()
+
+            self.optimizer.zero_grad() #  It resets/clears the gradients of all model parameters (i.e., weights).
+            # PyTorch by defualt adds new gradients to any existing gradients, to prevent this accumulation of gradients 
+            # from previous iterations, manually set them to zero at the beginning of each new training iteration.
+
+
+
+
+
 
             # Mixed precision and checkpointing
             with torch.amp.autocast(device_type='cuda'):
-                output = torch.utils.checkpoint.checkpoint(self.model, image, use_reentrant=False)
-                label = label.squeeze(1)
-                loss = self.criterion(output, label.long())
+                # Forward passing input data through the model to get predictions, start training
+                # reshape the 3D image tensor into a 5D tensor with the shape [batch_size, channels, depth, height, width].
+                # -1: The batch size dimension is inferred.
+                #  1: This indicates a single channel (grayscale MRI image).
+
+                output = torch.utils.checkpoint.checkpoint(self.model, image.reshape(-1, 1, self.shape, self.shape, self.shape), use_reentrant=False)
+
+
+                # Log the shapes and unique values of the image and label once
+                if self.log_image_label_shapes_once:
+                    # Log image and label shapes
+                    self.logger.log_message(f"Training image shape: {image.shape}")
+                    # Training image shape: torch.Size([1, 256, 256, 256])
+
+                    self.logger.log_message(f"Training label shape: {label.shape}")
+                    # Training label shape: torch.Size([1, 256, 256, 256])
+
+                    self.logger.log_message(f"Training output shape: {output.shape}")
+                    #  Training output shape: torch.Size([1, 3, 256, 256, 256])
+                    
+                    # Log the unique values in both image and label
+                    unique_label = torch.unique(label)
+                    self.logger.log_message(f"Unique values in training label: {unique_label.tolist()}")
+                    #  Unique values in training label: [0.0, 0.5, 1.0]    <<<<<<<<<<<<<<<<< Normalized by Pratyush
+
+                    self.log_image_label_shapes_once = False  # Set to False so this is only logged once                
+
+                # compute the loss between the predicted output and the ground truth labels
+                # The label tensor is reshaped to [batch_size, depth, height, width] to match the output shape of the model.
+                # .long() * 2: Double the label values. Looks like Pratyush made it 0, 0.5, 1 range. 
+
+                #  For CrossEntropyLoss, the input (predictions) should have 
+                #  shape [batch_size, num_classes, height, width, depth] (as the output does),
+                #  while the target (label) should have shape [batch_size, height, width, depth] containing class indices as integers.                
+                loss = self.criterion(output, label.reshape(-1, self.shape, self.shape, self.shape).long() * 2)
 
             # Accumulate loss
             total_loss += loss.item()
@@ -317,9 +375,15 @@ class MeshNetExecutor(Executor):
             # Scale loss and backward pass
             # self.scaler.scale(loss).backward()
 
-            # Scale loss and backward pass
+            # Scale loss and backward pass (Backpropagation)
+            # Backward pass (gradient calculation): Calculate the gradients for all the model's parameters with respect to the loss:
             loss.backward() #  calculate gradients
-            self.optimizer.step() # gradients are applied to the model parameters           
+
+            self.optimizer.step() # gradients are applied to the model parameters 
+            # Training done for that round.   
+
+
+
 
             # # Accumulate gradients without updating yet
             # if (batch_id + 1) % self.gradient_accumulation_steps == 0:
@@ -334,11 +398,12 @@ class MeshNetExecutor(Executor):
 
         # Log the average loss and Dice score per epoch
         average_loss = total_loss / len(self.trainloader)
+
         # dice_score = self.calculate_dice(self.trainloader)
         # Calculate Dice score on the validation set
         self.model.eval()  # Set the model to evaluation mode for validation
         dice_score = self.calculate_dice(self.validloader)  # Use validation set        
-        self.logger.log_message(f"{self.site_name} - Epoch {self.current_epoch}: Loss = {average_loss}, Dice = {dice_score}")
+        self.logger.log_message(f"{self.site_name} - Epoch {self.current_epoch}: Loss = {average_loss}, Val Dice = {dice_score}")
 
         # Update the learning rate based on the loss     <<<<<<<<<<<<<< (Overlooked for now)
         self.scheduler.step(average_loss)
@@ -364,30 +429,80 @@ class MeshNetExecutor(Executor):
                 gradients.append(param.grad.clone().cpu().numpy())
         
 
-        return gradients        
+        # for example :
+        # gradients = [
+        #     array([[ 0.01, -0.02], [ 0.03,  0.04]]),  # gradient for some weight matrix (e.g shape [2, 2])
+        #     array([0.005, -0.015]),                   # gradient for some bias vector (e.g shape [2])
+        #     array([[ 0.02, 0.01], [-0.03, 0.05]])     # Another gradient for a different weight matrix and so on.
+        # ]
 
-    # def calculate_dice(self, loader):
-    #     dice_total = 0.0
-    #     for image, label in loader:
-    #         image, label = image.to(self.device), label.to(self.device)
-    #         with torch.no_grad():
-    #             output = self.model(image)
-    #             output_label = torch.argmax(output, dim=1)
-    #             dice_score = faster_dice(output_label, label.squeeze(1), labels=[0, 1, 2])
-    #             dice_total += dice_score.mean().item()
-    #     return dice_total / len(loader)
+
+
+        return gradients        
 
 
     def calculate_dice(self, loader):
         dice_total = 0.0
+
         for image, label in loader:
             image, label = image.to(self.device), label.to(self.device)
             with torch.no_grad():
-                output = self.model(image)
+                # Ensure consistency by reshaping image and label similarly as in the training loop
+                output = self.model(image.reshape(-1, 1, self.shape, self.shape, self.shape))  # Model expects this reshaped
+                # output shape : [1, 3, 256, 256, 256]
+
                 output_label = torch.argmax(output, dim=1)
-                dice_score = self.calculate_dice_score(output_label, label.squeeze(1))
+                # output_label  shape: [1, 256, 256, 256]
+                #  Max voxel value in  output_label : 2
+
+
+                if self.log_shapes_once: 
+
+                    self.logger.log_message(f"loaded image tensor shape: {image.shape}")
+                    self.logger.log_message(f"Max voxel value in loaded image: {image.max().item()}") 
+
+                    self.logger.log_message(f"Model output tensor shape: {output.shape}")
+                    # output shape : [1, 3, 256, 256, 256]
+
+                    # Log the shape after applying argmax only once
+                    self.logger.log_message(f"Output label shape after argmax: {output_label.shape}")
+                    # output_label  shape: [1, 256, 256, 256]
+                    
+                    # Log max voxel value
+                    self.logger.log_message(f"Max voxel value in  output_label: {output_label.max().item()}") 
+                    #  Max voxel value in  output_label : 2 
+
+                    # Log the GT label shape 
+                    self.logger.log_message(f" GT Label shape : {label.shape}")
+                    # GT label shape: [1, 256, 256, 256]
+                    
+
+                    # Log max voxel value in GT label
+                    self.logger.log_message(f"Max voxel value in GT label: {label.max().item()}")  
+                    # Max voxel value in GT label: 1.0
+
+                    # Log the unique values in both output_label and label
+                    unique_output = torch.unique(output_label)
+                    unique_label = torch.unique(label)
+                    self.logger.log_message(f"Unique values in output_label: {unique_output.tolist()}")
+                    self.logger.log_message(f"Unique values in GT label: {unique_label.tolist()}")
+
+
+                    self.log_shapes_once = False 
+            
+            
+                # Applying the same transformation to the labels as in training
+                # dice_score = self.calculate_dice_score(output_label, label.reshape(-1, self.shape, self.shape, self.shape) * 2)
+
+                # Multiply the label by 2 to restore original class values (0, 1, 2) before calculating Dice score
+                reshaped_label = label.reshape(self.shape, self.shape, self.shape).long() * 2
+
+                dice_score = self.calculate_dice_score(torch.squeeze(output_label), reshaped_label)
                 dice_total += dice_score
+
         return dice_total / len(loader)
+
+
 
     def calculate_dice_score(self, pred, target, num_classes=3):
         dice_scores = []
@@ -417,8 +532,11 @@ class MeshNetExecutor(Executor):
 
         # Apply aggregated gradients to the model parameters
         self.optimizer.zero_grad()
+
+        # The loop for param, grad in zip(self.model.parameters(), aggregated_gradients) is iterating 
+        # through the model's parameters and the aggregated gradients.
         for param, grad in zip(self.model.parameters(), aggregated_gradients):
-            param.grad = torch.tensor(grad).to(self.device)
+            param.grad = torch.tensor(grad).to(self.device) # manually setting the .grad attribute of each model parameter with the aggregated gradient.
         self.optimizer.step()        
 
         # Clear GPU memory cache after applying gradients

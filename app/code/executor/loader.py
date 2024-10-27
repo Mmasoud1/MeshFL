@@ -61,7 +61,12 @@ class Scanloader(torch.utils.data.Dataset):
 
 
         # return self.divide_into_sub_cubes(image_tensor.to(self.device)), self.divide_into_sub_cubes(label_tensor.to(self.device))
-        return image_tensor.unsqueeze(0).to(self.device), label_tensor.unsqueeze(0).to(self.device)
+
+        # if the image_tensor has shape [C, D, H, W] (where C is the number of channels, D is depth, H is height, 
+        # and W is width for 3D data), applying unsqueeze(0) will change its shape to [1, C, D, H, W], 
+        # where 1 is the batch size. 
+              
+        return image_tensor.to(self.device), label_tensor.to(self.device)
 
       
     def split_dataset(self):
