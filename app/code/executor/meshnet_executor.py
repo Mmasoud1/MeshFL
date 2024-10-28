@@ -502,7 +502,7 @@ class MeshNetExecutor(Executor):
 
                 # Only save one NIfTI output if the Dice score is above the threshold AND for only once
                 if dice_score.item() >= self.dice_threshold_to_save_output and not self.nifti_saved:
-                    self.logger.log_message("Saving NIfTI files for one output and label...")
+                    self.logger.log_message("Saving NIfTI files for one input, output and label...")
 
                     # Get the output directory path
                     output_dir = get_output_directory_path(fl_ctx)
@@ -511,8 +511,15 @@ class MeshNetExecutor(Executor):
                     dice_score_str = f"{dice_score.item():.4f}"                    
                     
                     # set paths
+                    input_nifti_path = os.path.join(output_dir, f"input_sample.nii.gz") 
                     output_label_nifti_path = os.path.join(output_dir, f"output_label_dice_{dice_score_str}.nii.gz") 
                     label_nifti_path = os.path.join(output_dir, f"sq_long_by2_label_sample.nii.gz")                     
+
+
+                    # Save input image (floating point), squeeze to make it 3D [256, 256, 256]
+                    input_image_nifti = nib.Nifti1Image(image.squeeze(0).cpu().numpy().astype(np.float32), np.eye(4))
+                    nib.save(input_image_nifti, input_nifti_path)
+
 
                     # Convert to compatible data type (int32) before saving as NIfTI
                     output_label_nifti = nib.Nifti1Image(output_label.cpu().numpy().astype(np.int32), np.eye(4))
@@ -521,8 +528,8 @@ class MeshNetExecutor(Executor):
                     nib.save(output_label_nifti, output_label_nifti_path)
                     nib.save(label_nifti, label_nifti_path)
 
-                    self.logger.log_message(f"NIfTI files saved: output_label_dice_{dice_score_str}.nii.gz, sq_long_by2_label_sample.nii.gz")
-                    self.logger.log_message(f"save location : {output_dir}")
+                    self.logger.log_message(f"NIfTI files saved: input_sample.nii.gz, output_label_dice_{dice_score_str}.nii.gz, sq_long_by2_label_sample.nii.gz")
+                    self.logger.log_message(f"Saved samples location : {output_dir}")
 
                     self.nifti_saved = True  # Set flag to true to avoid saving multiple times
 

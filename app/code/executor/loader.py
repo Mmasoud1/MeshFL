@@ -52,7 +52,7 @@ class Scanloader(torch.utils.data.Dataset):
         # image_tensor = self.augmentation(image_tensor)        
 
         # Normalize image tensor
-        image_tensor = (image_tensor - image_tensor.min()) / (image_tensor.max() - image_tensor.min())
+        # image_tensor = (image_tensor - image_tensor.min()) / (image_tensor.max() - image_tensor.min())
 
         label = zlib.decompress(sample[1])
         label_tensor = torch.from_numpy(np.copy(np.frombuffer(label, dtype=np.float32)).reshape((256, 256, 256)))
