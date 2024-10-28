@@ -2,6 +2,7 @@ import torch
 import os
 import random  
 import numpy as np  
+import nibabel as nib
 from nvflare.apis.executor import Executor
 from nvflare.apis.fl_constant import FLContextKey
 from nvflare.apis.fl_context import FLContext
@@ -74,8 +75,8 @@ class MeshNetExecutor(Executor):
         for param in self.model.parameters():
             param.requires_grad = True
 
-
-        self.learning_rate = 0.0001    #<<<<<<<<<<<<<<<<<<<<<<<<
+        # Initialize the variable to store the previous learning rate (initially None)
+        self.learning_rate = self.previous_lr  = 0.0001    #<<<<<<<<<<<<<<<<<<<<<<<<
 
         # Optimizer and criterion setup
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate) 
@@ -91,7 +92,7 @@ class MeshNetExecutor(Executor):
         self.current_epoch = 0
 
         # Epochs and aggregation interval
-        self.total_epochs = 30  # Set the total number of epochs          #<<<<<<<<<<<<<<<<<<<<<<<<
+        self.total_epochs = 50  # Set the total number of epochs          #<<<<<<<<<<<<<<<<<<<<<<<<
         # self.aggregation_interval = 1  # Aggregation occurs every 5 epochs (you can modify this)
 
         self.dice_threshold = 0.9  # Set the Dice score threshold
@@ -111,16 +112,25 @@ class MeshNetExecutor(Executor):
 
         self.log_shapes_once = True  # Flag to log tensor shapes only once
 
-    def set_seed(self, seed):
-        # Set the random seed for reproducibility
-        random.seed(seed)
-        np.random.seed(seed)
-        torch.manual_seed(seed)
-        if torch.cuda.is_available():
-            torch.cuda.manual_seed(seed)
-            torch.cuda.manual_seed_all(seed)
-        torch.backends.cudnn.deterministic = True  # Ensure deterministic behavior
-        torch.backends.cudnn.benchmark = False
+        self.nifti_saved = False  # Flag to ensure we save only one sample
+
+        self.dice_threshold_to_save_output = 0.3   # save output sample when dice above the threshold # <<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+
+
+
+    # def set_seed(self, seed):
+    #     # Set the random seed for reproducibility
+    #     random.seed(seed)
+    #     np.random.seed(seed)
+    #     torch.manual_seed(seed)
+    #     if torch.cuda.is_available():
+    #         torch.cuda.manual_seed(seed)
+    #         torch.cuda.manual_seed_all(seed)
+    #     torch.backends.cudnn.deterministic = True  # Ensure deterministic behavior
+    #     torch.backends.cudnn.benchmark = False
 
     def execute(
         self,
@@ -173,7 +183,7 @@ class MeshNetExecutor(Executor):
 
         if task_name == "train_and_get_gradients":
             self.logger.log_message(f"{self.site_name}-train_and_get_gradients called ")
-            gradients = self.train_and_get_gradients()
+            gradients = self.train_and_get_gradients(fl_ctx)
             outgoing_shareable = Shareable()
             outgoing_shareable["gradients"] = gradients
             return outgoing_shareable
@@ -299,21 +309,23 @@ class MeshNetExecutor(Executor):
 
 
 
-    def load_model_weights(self, model_weights):
-        # Load the received model weights into the local model
-        # (((( FOR FUTUR USE))))
-        self.model.load_state_dict(model_weights)
-        self.logger.log_message(f"Loaded initial model weights for site {self.site_name}")
+    # def load_model_weights(self, model_weights):
+    #     # Load the received model weights into the local model
+    #     # (((( FOR FUTUR USE))))
+    #     self.model.load_state_dict(model_weights)
+    #     self.logger.log_message(f"Loaded initial model weights for site {self.site_name}")
 
 
 
-    def train_and_get_gradients(self):
+    def train_and_get_gradients(self, fl_ctx):
         # Set the model to training mode, so dropout is activated
         # and BatchNorm normalizes the input based on the statistics of the current mini-batch.
         self.model.train()
 
         # Initialize accumulators for the loss and gradients
         total_loss = 0.0
+
+    
 
         # Training loop for one epoch (full pass through the dataset)
 
@@ -327,18 +339,20 @@ class MeshNetExecutor(Executor):
             # from previous iterations, manually set them to zero at the beginning of each new training iteration.
 
 
-
-
-
-
             # Mixed precision and checkpointing
             with torch.amp.autocast(device_type='cuda'):
                 # Forward passing input data through the model to get predictions, start training
+                
                 # reshape the 3D image tensor into a 5D tensor with the shape [batch_size, channels, depth, height, width].
                 # -1: The batch size dimension is inferred.
                 #  1: This indicates a single channel (grayscale MRI image).
-
                 output = torch.utils.checkpoint.checkpoint(self.model, image.reshape(-1, 1, self.shape, self.shape, self.shape), use_reentrant=False)
+
+                labels = torch.squeeze(label)  # Squeeze the label
+                # Training label shape: torch.Size([1, 256, 256, 256])
+                # Squeeze labels shape : [ 256, 256, 256]
+
+                labels = (labels * 2).round().long()  # Multiply by 2, round the values, and cast to long
 
 
                 # Log the shapes and unique values of the image and label once
@@ -355,8 +369,12 @@ class MeshNetExecutor(Executor):
                     
                     # Log the unique values in both image and label
                     unique_label = torch.unique(label)
-                    self.logger.log_message(f"Unique values in training label: {unique_label.tolist()}")
+                    unique_labels = torch.unique(labels)
+                    self.logger.log_message(f"Unique values in training GT label: {unique_label.tolist()}")
                     #  Unique values in training label: [0.0, 0.5, 1.0]    <<<<<<<<<<<<<<<<< Normalized by Pratyush
+                    
+                    self.logger.log_message(f"Unique values in training sequeezed long scaled labels: {unique_labels.tolist()}")
+                    #  Unique values in training label: [0, 1, 2]   
 
                     self.log_image_label_shapes_once = False  # Set to False so this is only logged once                
 
@@ -367,7 +385,11 @@ class MeshNetExecutor(Executor):
                 #  For CrossEntropyLoss, the input (predictions) should have 
                 #  shape [batch_size, num_classes, height, width, depth] (as the output does),
                 #  while the target (label) should have shape [batch_size, height, width, depth] containing class indices as integers.                
-                loss = self.criterion(output, label.reshape(-1, self.shape, self.shape, self.shape).long() * 2)
+
+
+
+                loss = self.criterion(output, labels.reshape(-1, self.shape, self.shape, self.shape))
+
 
             # Accumulate loss
             total_loss += loss.item()
@@ -383,6 +405,14 @@ class MeshNetExecutor(Executor):
             # Training done for that round.   
 
 
+
+            # Get the current learning rate
+            current_lr = self.optimizer.param_groups[0]['lr']
+
+            # Check if the learning rate has changed, and log it if so
+            if current_lr != self.previous_lr:
+                self.logger.log_message(f"Learning rate changed from {self.previous_lr} to: {current_lr}")
+                previous_lr = current_lr  # Update the previous learning rate
 
 
             # # Accumulate gradients without updating yet
@@ -402,7 +432,7 @@ class MeshNetExecutor(Executor):
         # dice_score = self.calculate_dice(self.trainloader)
         # Calculate Dice score on the validation set
         self.model.eval()  # Set the model to evaluation mode for validation
-        dice_score = self.calculate_dice(self.validloader)  # Use validation set        
+        dice_score = self.calculate_dice(self.validloader, fl_ctx)  # Use validation set        
         self.logger.log_message(f"{self.site_name} - Epoch {self.current_epoch}: Loss = {average_loss}, Val Dice = {dice_score}")
 
         # Update the learning rate based on the loss     <<<<<<<<<<<<<< (Overlooked for now)
@@ -441,19 +471,61 @@ class MeshNetExecutor(Executor):
         return gradients        
 
 
-    def calculate_dice(self, loader):
+
+    # New one with fast dice
+    def calculate_dice(self, loader, fl_ctx):
         dice_total = 0.0
 
         for image, label in loader:
             image, label = image.to(self.device), label.to(self.device)
-            with torch.no_grad():
+            with torch.inference_mode():
                 # Ensure consistency by reshaping image and label similarly as in the training loop
                 output = self.model(image.reshape(-1, 1, self.shape, self.shape, self.shape))  # Model expects this reshaped
                 # output shape : [1, 3, 256, 256, 256]
 
-                output_label = torch.argmax(output, dim=1)
-                # output_label  shape: [1, 256, 256, 256]
-                #  Max voxel value in  output_label : 2
+                # GT label shape: [1, 256, 256, 256]
+                # Max voxel value in  GT label: 1.0
+
+                # Squeeze and get argmax to produce predictions
+                output_label = torch.squeeze(torch.argmax(output, dim=1)).long()
+                # result  shape: [256, 256, 256]
+                #  Max voxel value in  result: 2
+
+                labels = torch.round(torch.squeeze(label) * 2).long()
+                # labels  shape: [256, 256, 256]
+                #  Max voxel value in  labels : 2
+
+                # Compute DICE using faster_dice method and torch.mean for averaging across classes
+                dice_score = torch.mean(faster_dice(output_label, labels, labels=[0, 1, 2]))
+
+                dice_total += dice_score.item()
+
+                # Only save one NIfTI output if the Dice score is above the threshold AND for only once
+                if dice_score.item() >= self.dice_threshold_to_save_output and not self.nifti_saved:
+                    self.logger.log_message("Saving NIfTI files for one output and label...")
+
+                    # Get the output directory path
+                    output_dir = get_output_directory_path(fl_ctx)
+
+                    # Format the Dice score to 4 decimal places
+                    dice_score_str = f"{dice_score.item():.4f}"                    
+                    
+                    # set paths
+                    output_label_nifti_path = os.path.join(output_dir, f"output_label_dice_{dice_score_str}.nii.gz") 
+                    label_nifti_path = os.path.join(output_dir, f"sq_long_by2_label_sample.nii.gz")                     
+
+                    # Convert to compatible data type (int32) before saving as NIfTI
+                    output_label_nifti = nib.Nifti1Image(output_label.cpu().numpy().astype(np.int32), np.eye(4))
+                    label_nifti = nib.Nifti1Image(labels.cpu().numpy().astype(np.int32), np.eye(4))
+
+                    nib.save(output_label_nifti, output_label_nifti_path)
+                    nib.save(label_nifti, label_nifti_path)
+
+                    self.logger.log_message(f"NIfTI files saved: output_label_dice_{dice_score_str}.nii.gz, sq_long_by2_label_sample.nii.gz")
+                    self.logger.log_message(f"save location : {output_dir}")
+
+                    self.nifti_saved = True  # Set flag to true to avoid saving multiple times
+
 
 
                 if self.log_shapes_once: 
@@ -466,7 +538,7 @@ class MeshNetExecutor(Executor):
 
                     # Log the shape after applying argmax only once
                     self.logger.log_message(f"Output label shape after argmax: {output_label.shape}")
-                    # output_label  shape: [1, 256, 256, 256]
+                    # output_label  shape: [256, 256, 256]
                     
                     # Log max voxel value
                     self.logger.log_message(f"Max voxel value in  output_label: {output_label.max().item()}") 
@@ -475,51 +547,108 @@ class MeshNetExecutor(Executor):
                     # Log the GT label shape 
                     self.logger.log_message(f" GT Label shape : {label.shape}")
                     # GT label shape: [1, 256, 256, 256]
-                    
 
-                    # Log max voxel value in GT label
-                    self.logger.log_message(f"Max voxel value in GT label: {label.max().item()}")  
-                    # Max voxel value in GT label: 1.0
+                    # Log the Squeezed long GT label shape 
+                    self.logger.log_message(f" Squeezed long Labels shape : {labels.shape}")
+                    # GT label shape: [ 256, 256, 256]
 
                     # Log the unique values in both output_label and label
                     unique_output = torch.unique(output_label)
-                    unique_label = torch.unique(label)
+                    unique_label = torch.unique(label)  # GT label
+                    unique_labels = torch.unique(labels) # Squeezed long GT Label
                     self.logger.log_message(f"Unique values in output_label: {unique_output.tolist()}")
                     self.logger.log_message(f"Unique values in GT label: {unique_label.tolist()}")
-
+                    self.logger.log_message(f"Unique values in Squeezed long labels: {unique_labels.tolist()}")
 
                     self.log_shapes_once = False 
+
+        return dice_total / len(loader)  
+
+
+
+    # def calculate_dice_old(self, loader):
+    #     dice_total = 0.0
+
+    #     for image, label in loader:
+    #         image, label = image.to(self.device), label.to(self.device)
+    #         with torch.no_grad():
+    #             # Ensure consistency by reshaping image and label similarly as in the training loop
+    #             output = self.model(image.reshape(-1, 1, self.shape, self.shape, self.shape))  # Model expects this reshaped
+    #             # output shape : [1, 3, 256, 256, 256]
+
+    #             output_label = torch.argmax(output, dim=1)
+    #             # output_label  shape: [1, 256, 256, 256]
+    #             #  Max voxel value in  output_label : 2
+
+
+    #             if self.log_shapes_once: 
+
+    #                 self.logger.log_message(f"loaded image tensor shape: {image.shape}")
+    #                 self.logger.log_message(f"Max voxel value in loaded image: {image.max().item()}") 
+
+    #                 self.logger.log_message(f"Model output tensor shape: {output.shape}")
+    #                 # output shape : [1, 3, 256, 256, 256]
+
+    #                 # Log the shape after applying argmax only once
+    #                 self.logger.log_message(f"Output label shape after argmax: {output_label.shape}")
+    #                 # output_label  shape: [1, 256, 256, 256]
+                    
+    #                 # Log max voxel value
+    #                 self.logger.log_message(f"Max voxel value in  output_label: {output_label.max().item()}") 
+    #                 #  Max voxel value in  output_label : 2 
+
+    #                 # Log the GT label shape 
+    #                 self.logger.log_message(f" GT Label shape : {label.shape}")
+    #                 # GT label shape: [1, 256, 256, 256]
+                    
+
+    #                 # Log max voxel value in GT label
+    #                 self.logger.log_message(f"Max voxel value in GT label: {label.max().item()}")  
+    #                 # Max voxel value in GT label: 1.0
+
+    #                 # Log the unique values in both output_label and label
+    #                 unique_output = torch.unique(output_label)
+    #                 unique_label = torch.unique(label)
+    #                 self.logger.log_message(f"Unique values in output_label: {unique_output.tolist()}")
+    #                 self.logger.log_message(f"Unique values in GT label: {unique_label.tolist()}")
+
+
+    #                 self.log_shapes_once = False 
             
             
-                # Applying the same transformation to the labels as in training
-                # dice_score = self.calculate_dice_score(output_label, label.reshape(-1, self.shape, self.shape, self.shape) * 2)
+    #             # Applying the same transformation to the labels as in training
+    #             # dice_score = self.calculate_dice_score(output_label, label.reshape(-1, self.shape, self.shape, self.shape) * 2)
 
-                # Multiply the label by 2 to restore original class values (0, 1, 2) before calculating Dice score
-                reshaped_label = label.reshape(self.shape, self.shape, self.shape).long() * 2
+    #             # Multiply the label by 2 to restore original class values (0, 1, 2) before calculating Dice score
+    #             reshaped_label = label.reshape(self.shape, self.shape, self.shape).long() * 2
 
-                dice_score = self.calculate_dice_score(torch.squeeze(output_label), reshaped_label)
-                dice_total += dice_score
+    #             dice_score = self.calculate_dice_score(torch.squeeze(output_label), reshaped_label)
+    #             dice_total += dice_score
 
-        return dice_total / len(loader)
+    #     return dice_total / len(loader)
 
 
 
-    def calculate_dice_score(self, pred, target, num_classes=3):
-        dice_scores = []
 
-        for class_idx in range(num_classes):
-            pred_class = (pred == class_idx).float()
-            target_class = (target == class_idx).float()
+  
 
-            intersection = (pred_class * target_class).sum()
-            union = pred_class.sum() + target_class.sum()
 
-            # To avoid division by zero, add a small epsilon to the denominator
-            dice_score = (2.0 * intersection) / (union + 1e-6)
-            dice_scores.append(dice_score.item())
+    # def calculate_dice_score(self, pred, target, num_classes=3):
+    #     dice_scores = []
 
-        # Return the mean Dice score across all classes
-        return sum(dice_scores) / len(dice_scores)
+    #     for class_idx in range(num_classes):
+    #         pred_class = (pred == class_idx).float()
+    #         target_class = (target == class_idx).float()
+
+    #         intersection = (pred_class * target_class).sum()
+    #         union = pred_class.sum() + target_class.sum()
+
+    #         # To avoid division by zero, add a small epsilon to the denominator
+    #         dice_score = (2.0 * intersection) / (union + 1e-6)
+    #         dice_scores.append(dice_score.item())
+
+    #     # Return the mean Dice score across all classes
+    #     return sum(dice_scores) / len(dice_scores)
 
 
 
