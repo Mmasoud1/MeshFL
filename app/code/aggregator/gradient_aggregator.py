@@ -50,6 +50,13 @@ class GradientAggregator(Aggregator):
         # Convert gradients to numpy arrays and perform averaging
         n = len(gradients_list)
 
+        # Ensure each gradient in gradients_list is in NumPy format
+        gradients_list = [
+            [np.array(grad) if isinstance(grad, list) else grad for grad in gradients]
+            for gradients in gradients_list
+        ]
+        
+
         # Initialize Empty Arrays: sum_arrays is created as a list of arrays with the same shape as the gradients. 
         # These arrays will accumulate the gradients from all clients.
         sum_arrays = [np.zeros_like(arr) for arr in gradients_list[0]]

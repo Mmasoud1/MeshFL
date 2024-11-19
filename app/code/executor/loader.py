@@ -75,9 +75,9 @@ class Scanloader(torch.utils.data.Dataset):
         train_data, valid_data, infer_data = torch.utils.data.random_split(self, [train_size, valid_size, self.len - train_size - valid_size])
         return train_data, valid_data, infer_data
 
-    def get_loaders(self, batch_size=1, shuffle=True):
+    def get_loaders(self, batch_size=1, shuffle=True, num_workers=0):
         train_data, valid_data, infer_data = self.split_dataset()
-        train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=shuffle)
-        valid_loader = torch.utils.data.DataLoader(valid_data, batch_size=batch_size, shuffle=False)
-        infer_loader = torch.utils.data.DataLoader(infer_data, batch_size=batch_size, shuffle=False)
+        train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+        valid_loader = torch.utils.data.DataLoader(valid_data, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+        infer_loader = torch.utils.data.DataLoader(infer_data, batch_size=batch_size, shuffle=False, num_workers=num_workers)
         return train_loader, valid_loader, infer_loader
