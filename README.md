@@ -12,11 +12,11 @@ MeshFL is an advanced framework for distributed learning in neuroimaging. Built 
 
 ## Key Features
 
-    - Federated training of the MeshNet model for 3D MRI brain segmentation.
-    - Supports decentralized learning across multiple sites using NVFlare.
-    - Automated data handling and splitting.
-    - Optimized GPU usage.
-    - Customizable training workflows with integrated Dice score evaluation.
+* Federated training of the MeshNet model for 3D MRI brain segmentation.
+* Supports decentralized learning across multiple sites using NVFlare.
+* Automated data handling and splitting.
+* Optimized GPU usage.
+* Customizable training workflows with integrated Dice score evaluation.
 
 
 To getting started please refer to this steps <b><a href="https://github.com/Mmasoud1/MeshFL/wiki/Setup"  style="text-decoration: none">here</a></b>
