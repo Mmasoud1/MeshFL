@@ -1,7 +1,9 @@
 # MeshFL [![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen)]()
 
 <div align="center">
+
 **[Updates](#Updates) &emsp; [Doc](https://github.com/Mmasoud1/MeshFL/wiki/) &emsp; [News!](#News)**
+
 </div>
 
 MeshFL is an advanced framework for distributed learning in neuroimaging. Built on the MeshNet model and NVFlare, it enables federated training for 3D MRI brain segmentation across decentralized data sites, maintaining privacy and efficiency.
