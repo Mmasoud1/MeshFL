@@ -3,6 +3,7 @@ import os
 import random  
 import numpy as np  
 import nibabel as nib
+import json
 from nvflare.apis.executor import Executor
 from nvflare.apis.fl_constant import FLContextKey
 from nvflare.apis.fl_context import FLContext
@@ -83,7 +84,7 @@ class MeshNetExecutor(Executor):
             param.requires_grad = True
 
         # Initialize the variable to store the previous learning rate (initially None)
-        self.learning_rate =  0.001    #<<<<<<<<<<<<<<<<<<<<<<<<
+        self.learning_rate =  0.0005    #<<<<<<<<<<<<<<<<<<<<<<<<
 
         self.previous_lr = 0
 
@@ -106,7 +107,7 @@ class MeshNetExecutor(Executor):
         self.current_epoch = 0
 
         # Epochs and aggregation interval
-        self.total_epochs = 350  # Set the total number of epochs          #<<<<<<<<<<<<<<<<<<<<<<<<
+        self.total_epochs = 10  # Set the total number of epochs          #<<<<<<<<<<<<<<<<<<<<<<<<
 
         self.target_dice = 0.95 # learning stop once reach this dice
         self.stop_training = False  # Flag to control breaking out of the outer loop
@@ -135,6 +136,8 @@ class MeshNetExecutor(Executor):
         self.dice_threshold_to_save_output = 0.3   # save output sample when dice above the threshold # <<<<<<<<<<<<<<<<<<<<<<<<
 
 
+        self.shuffle_training = True  # Set to True if shuffling is desired for standalone training
+        self.use_split_file = True
 
 
 
@@ -181,14 +184,13 @@ class MeshNetExecutor(Executor):
         if not self.data_loader_initialized:
             # Get the correct data directory path
             db_file_path = os.path.join(get_data_directory_path(fl_ctx), "mindboggle.db")
+            split_file_path = os.path.join(os.path.dirname(__file__), "splits.json")
 
             # Initialize Data Loader with dynamic path
-            self.data_loader = Scanloader(db_file=db_file_path, label_type='GWlabels', num_cubes=1)
-            self.trainloader, self.validloader, self.testloader = self.data_loader.get_loaders(batch_size=1)
-            
+            self.data_loader = Scanloader(db_file=db_file_path, label_type='GWlabels', num_cubes=1, 
+                                          use_split_file=self.use_split_file, split_file=split_file_path, subset="train", logger=self.logger)
+            self.trainloader, self.validloader, self.testloader = self.data_loader.get_loaders(batch_size=1, shuffle=self.shuffle_training)
 
-            # Log data loader details
-            self.logger.log_message(f"Data loader has {len(self.trainloader)} training samples")
 
             self.shape = 256
             self.current_iteration = 0
@@ -197,9 +199,13 @@ class MeshNetExecutor(Executor):
             self.iterations = self.total_epochs * self.train_size
 
             # Initialize the scheduler now that trainloader is available
+            # A very high learning rate essentially forces the model to discard previous learning and start afresh, disrupting convergence.
+            # Gradually warm up the learning rate instead of allowing it to spike early
             self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
                 self.optimizer, 
-                max_lr=0.01, 
+                max_lr=0.005, # Peak learning rate, the lower the less likley to overshoot during training
+                anneal_strategy='linear',  # Gradual increase and decrease
+                pct_start=0.1,  # Slow warm-up over the first 10% of training
                 total_steps=self.iterations if self.iterations > 0 else 1   # Exact number of steps
                 # epochs=self.total_epochs,
                 # steps_per_epoch=len(self.trainloader) if len(self.trainloader) > 0 else 1

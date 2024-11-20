@@ -1,62 +1,50 @@
-# MeshDist_nvflare
-MeshNet distributed learning by using the NVFlare framework.  
+# MeshFL [![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen)]()
 
-This work is in progress.. 
+**[Updates](#Updates) &emsp; [Doc](https://github.com/Mmasoud1/MeshFL/wiki/) &emsp; [News!](#News)**
 
+MeshFL is an advanced framework for distributed learning in neuroimaging. Built on the MeshNet model and NVFlare, it enables federated training for 3D MRI brain segmentation across decentralized data sites, maintaining privacy and efficiency.
 
+ For more information about MeshFL, please refer to this detailed <b><a href="https://github.com/Mmasoud1/MeshFL/wiki/"  style="text-decoration: none">Wiki</a></b>
 
-## Quick Setup Guide
+## Key Features
 
-### 1. Clone the Repository
-
-First, clone the repository from GitHub or the relevant location to your machine:
-
-git clone https://github.com/Mmasoud1/MeshDist_nvflare.git
-
-cd MeshDist_NVFlare
-
+    - Federated training of the MeshNet model for 3D MRI brain segmentation.
+    - Supports decentralized learning across multiple sites using NVFlare.
+    - Automated data handling and splitting.
+    - Optimized GPU usage.
+    - Customizable training workflows with integrated Dice score evaluation.
 
 
-### 2. Check for PyTorch with CUDA Support 
-
-In the terminal, check if CUDA and torch is installed :
-
-nvcc --version
-
-python -c "import torch; print(torch.cuda.is_available())"
+To getting started please refer to this steps <b><a href="https://github.com/Mmasoud1/MeshFL/wiki/Setup"  style="text-decoration: none">here</a></b>
 
 
-This should return true. 
+## Updates
+
+**MeshFL <a href= "https://github.com/Mmasoud1/MeshFL/releases/tag/v1.0.0" target="_blank"  style="text-decoration: none"> v1.0.0 </a> has been released**
+
+## News!
+
+## Contributions
+
+We welcome contributions to MeshFL! Whether it's bug fixes, new features, or documentation improvements, feel free to submit an issue or a pull request.
 
 
-### 3. Install nvflare
+## Acknowledgments
+
+    NVFlare: Federated learning framework.
 
 
-pip install nvflare==2.4.0
+## Funding
+
+This work was funded by the NIH grant xx    
 
 
-Recommended: 
+<br />
+<div align="center">
 
-pip install numpy==1.22.0
+<img src='https://github.com/Mmasoud1/MeshFL/blob/main/css/logo/TReNDS_logo.jpg' width='300' height='100'></img>
 
-pip install pandas==2.0.3
-
-
-### 4. Set Required Environment Variables
-
-
-export PYTHONPATH=$PYTHONPATH:[path to this dir]/app/code/
-
-export NVFLARE_POC_WORKSPACE=[path to this dir]/poc-workspace/
-
-
-
-### 5. Run nvflare simulator
-
-nvflare simulator -c site1,site2 ./jobs/job
-
-
-
+</div>
 
 
 
