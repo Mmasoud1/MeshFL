@@ -18,8 +18,8 @@ MeshFL is an advanced framework for distributed learning in neuroimaging. Built 
 * Optimized GPU usage.
 * Customizable training workflows with integrated Dice score evaluation.
 
-
-To getting started please refer to this steps <b><a href="https://github.com/Mmasoud1/MeshFL/wiki/Setup"  style="text-decoration: none">here</a></b>
+## Getting Started
+To start MeshFL, please refer to this steps <b><a href="https://github.com/Mmasoud1/MeshFL/wiki/Setup"  style="text-decoration: none">here</a></b>
 
 
 ## Updates
