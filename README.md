@@ -35,7 +35,7 @@ We welcome contributions to MeshFL! Whether it's bug fixes, new features, or doc
 
 ## Acknowledgments
 
-    NVFlare: Federated learning framework.
+[NVFlare:](https://developer.nvidia.com/flare) Federated learning framework. 
 
 
 ## Funding
