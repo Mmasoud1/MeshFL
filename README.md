@@ -1,4 +1,4 @@
-# MeshFL [![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen)]()
+# MeshFL [![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen)]() [![MIT-License ](https://img.shields.io/badge/license-MIT-green)](https://github.com/Mmasoud1/MeshFL/blob/main/LICENSE) [![Torch](https://img.shields.io/badge/Trained%20Model-blue)]()
 
 <div align="center">
 
@@ -10,7 +10,7 @@
  <img src="https://github.com/Mmasoud1/MeshFL/blob/main/css/logo/MeshFL.png"  width="25%" align="right">
 
   <p align="justify">
-MeshFL is an advanced framework for distributed learning in neuroimaging. Built on the <a href="https://medium.com/pytorch/catalyst-neuro-a-3d-brain-segmentation-pipeline-for-mri-b1bb1109276a" target="_blank"  style="text-decoration: none"> MeshNet</a>) model and NVFlare, it enables federated training for 3D MRI brain segmentation across decentralized data sites, maintaining privacy and efficiency.
+MeshFL is an advanced framework for distributed learning in neuroimaging. Built on the <a href="https://medium.com/pytorch/catalyst-neuro-a-3d-brain-segmentation-pipeline-for-mri-b1bb1109276a" target="_blank"  style="text-decoration: none"> MeshNet</a> models and <a href="https://developer.nvidia.com/flare" target="_blank"  style="text-decoration: none"> NVFlare</a>, it enables federated training for 3D MRI brain segmentation across decentralized data sites, maintaining privacy and efficiency.
  </p>
 
 <p align="justify">
@@ -33,26 +33,30 @@ To start MeshFL, please refer to this steps <b><a href="https://github.com/Mmaso
 
 ## Updates
 
-**MeshFL <a href= "https://github.com/Mmasoud1/MeshFL/releases/tag/v1.0.0" target="_blank"  style="text-decoration: none"> v1.0.0 </a> has been released**
+* MeshFL <a href= "https://github.com/Mmasoud1/MeshFL/releases/tag/v1.0.0" target="_blank"  style="text-decoration: none"> v1.0.0 </a> has been released
 
 ## News!
 
-## Contributions
+## Contributions and Authorship Guidelines
 
 We welcome contributions to MeshFL! Whether it's bug fixes, new features, or documentation improvements, feel free to submit an issue or a pull request.
+
+If you modify or extend MeshFL in a derivative work intended for publication (such as a research paper or software tool), please cite and acknowledge the original MeshFL project and the original authors. 
+
+We also request that significant contributions to derivative works be recognized by including original authors as co-authors, where appropriate.
 
 
 ## Acknowledgments
 
 [NVFlare:](https://developer.nvidia.com/flare) Federated learning framework. 
-
+[MeshNet:](https://medium.com/pytorch/catalyst-neuro-a-3d-brain-segmentation-pipeline-for-mri-b1bb1109276a) Volumetric dilated convolutional neural network architecture for MRI segmentation.
 
 ## Funding
 
-This work was funded by the NIH grant xx    
-
+MeshFL release V1.0.0 was funded by the NIH grant xx    
 
 <br />
+
 <div align="center">
 
 <img src='https://github.com/Mmasoud1/MeshFL/blob/main/css/logo/TReNDS_logo.jpg' width='300' height='100'></img>
