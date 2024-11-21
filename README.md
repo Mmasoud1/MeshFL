@@ -6,9 +6,18 @@
 
 </div>
 
-MeshFL is an advanced framework for distributed learning in neuroimaging. Built on the MeshNet model and NVFlare, it enables federated training for 3D MRI brain segmentation across decentralized data sites, maintaining privacy and efficiency.
+<br>
+ <img src="https://github.com/Mmasoud1/MeshFL/blob/main/css/logo/MeshFL.png"  width="50%" align="right">
 
+  <p align="justify">
+MeshFL is an advanced framework for distributed learning in neuroimaging. Built on the <a href="https://medium.com/pytorch/catalyst-neuro-a-3d-brain-segmentation-pipeline-for-mri-b1bb1109276a" target="_blank"  style="text-decoration: none"> MeshNet</a>) model and NVFlare, it enables federated training for 3D MRI brain segmentation across decentralized data sites, maintaining privacy and efficiency.
+ </p>
+
+<p align="justify">
  For more information about MeshFL, please refer to this detailed <b><a href="https://github.com/Mmasoud1/MeshFL/wiki/"  style="text-decoration: none">Wiki</a></b>
+</p>
+
+<br>
 
 ## Key Features
 
