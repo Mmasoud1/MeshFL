@@ -1,4 +1,4 @@
-# MeshFL [![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen)]() [![MIT-License ](https://img.shields.io/badge/license-MIT-green)](https://github.com/Mmasoud1/MeshFL/blob/main/LICENSE) [![Torch](https://img.shields.io/badge/Trained%20Model-blue)]()
+# MeshFL [![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen)]() [![MIT-License ](https://img.shields.io/badge/license-MIT-green)](https://github.com/Mmasoud1/MeshFL/blob/main/LICENSE) [![PyTorch](https://img.shields.io/badge/PyTorch-Trained%20Model-blue)]()
 
 <div align="center">
 
@@ -49,6 +49,7 @@ We also request that significant contributions to derivative works be recognized
 ## Acknowledgments
 
 [NVFlare:](https://developer.nvidia.com/flare) Federated learning framework. 
+
 [MeshNet:](https://medium.com/pytorch/catalyst-neuro-a-3d-brain-segmentation-pipeline-for-mri-b1bb1109276a) Volumetric dilated convolutional neural network architecture for MRI segmentation.
 
 ## Funding
