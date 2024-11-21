@@ -27,6 +27,14 @@
 * Optimized GPU usage.
 * Customizable training workflows with integrated Dice score evaluation.
 
+<br>
+<div align="center">
+
+![Interface](https://github.com/Mmasoud1/MeshFL/blob/main/css/images/MeshFL_animated_output.gif)
+
+**MeshFL training and MRI segmentation outputs**
+</div>
+
 ## Getting Started
 To start MeshFL, please refer to this steps <b><a href="https://github.com/Mmasoud1/MeshFL/wiki/Setup"  style="text-decoration: none">here</a></b>
 
