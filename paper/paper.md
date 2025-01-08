@@ -44,7 +44,7 @@ MeshFL provides an easy-to-use yet robust environment for researchers and clinic
 
 MeshFL leverages NVFlare to implement federated learning workflows, allowing local sites to independently train the MeshNet model on their data and exchange model updates with a central server as shown in \autoref{fig:MeshFL-Seq-Diagram}. 
 
-
+![MeshFL Sequence Diagram.](MeshFL-Seq-Diagram.png){ width=80% }
 
 MeshFL key features include:
 - **Data Preprocessing:** Automated partitioning of MRI scans into training, validation, and testing sets.
@@ -64,6 +64,7 @@ The performance of MeshFL was validated using the Mindboggle dataset [@mindboggl
 
 Results demonstrated that MeshFL achieved Dice scores of ~0.92 for training and ~0.9 for validation with robust performance comparable to centralized training  \autoref{fig:MeshFL-Performance}.
 
+![MeshFL Training Performance.](MeshFL-Performanc.png){ width=80% }
 
 # Code Availability
 
