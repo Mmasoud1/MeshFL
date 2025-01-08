@@ -1,5 +1,5 @@
 ---
-title: 'MeshFL: A Decentralized Framework for Federated Learning in Neuroimaging'
+title: 'MeshFL: A Decentralized MeshNet Framework for 3D Brain MRI Segmentation'
 tags:
     - Federated Learning
     - Distributed Machine Learning
