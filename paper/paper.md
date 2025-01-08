@@ -13,6 +13,9 @@ authors:
     - name: Sergey Plis
       orcid: 0000-0003-0040-0365
       affiliation: "1, 2"
+    - name: Sandeep Panta
+      orcid: 0000-000x-00xx-xxxx
+      affiliation: 1     
     - name: authors
       affiliation: 1
 affiliations:
@@ -79,12 +82,12 @@ MeshFL is openly available on GitHub at [https://github.com/Mmasoud1/MeshFL](htt
 
 We describe contributions to this paper using the CRediT taxonomy [@credit].
 - **Writing – Original Draft:** M.M.
-- **Writing – Review & Editing:** M.M., and S.P.
-- **Conceptualization and Methodology:** M.M., and S.P.
+- **Writing – Review & Editing:** M.M., and S.Plis.
+- **Conceptualization and Methodology:** M.M., and S.Plis.
 - **Software and Data Curation:** M.M.
-- **Validation:** M.M., and S.P.
+- **Validation:** M.M., S.Plis., and S.Panta.
 - **Resources:** [To be added]
-- **Project Administration:** M.M.
+- **Project Administration:** M.M., and S.Panta.
 
 # Acknowledgments
 
