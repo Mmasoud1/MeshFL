@@ -13,7 +13,7 @@ authors:
     - name: Sergey Plis
       orcid: 0000-0003-0040-0365
       affiliation: "1, 2"
-    - name: [authors]
+    - name: authors
       affiliation: 1
 affiliations:
   - name: Tri-institutional Center for Translational Research in Neuroimaging and Data Science (TReNDS), Georgia State University, Georgia Institute of Technology, Emory University, Atlanta, United States of America
