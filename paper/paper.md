@@ -44,13 +44,18 @@ MeshFL provides an easy-to-use yet robust environment for researchers and clinic
 
 MeshFL leverages NVFlare to implement federated learning workflows, allowing local sites to independently train the MeshNet model on their data and exchange model updates with a central server as shown in \autoref{fig:MeshFL-Seq-Diagram}. 
 
-![MeshFL Sequence Diagram.](MeshFL-Seq-Diagram.png){ width=80% }
+![MeshFL Sequence Diagram.](MeshFL-Seq-Diagram.png){ width=60% }
 
 MeshFL key features include:
+
 - **Data Preprocessing:** Automated partitioning of MRI scans into training, validation, and testing sets.
+
 - **Model Training:** The framework utilizes PyTorch for implementing the MeshNet model and optimize memory usage. Layer checkpointing further reduces memory overhead during training.
+
 - **Aggregation Strategies:** Federated averaging of model weights to produce a global model. Initial model weights are shared across sites for consistent training initialization.
+
 - **Custom Logger:** MeshFL includes a GenericLogger for detailed logging of training progress, gradient application, and Dice score evaluations.
+
 - **Scalability:** Seamless support for multiple sites with varying data distributions and qualities.
 
 The architecture of MeshNet, a 3D convolutional neural network, is optimized for volumetric brain MRI segmentation, employing dilated convolutions to capture contextual information while maintaining a compact parameter set [@Yu:2016]. A CrossEntropyLoss criterion with class weights addresses class imbalance.
@@ -64,7 +69,7 @@ The performance of MeshFL was validated using the Mindboggle dataset [@mindboggl
 
 Results demonstrated that MeshFL achieved Dice scores of ~0.92 for training and ~0.9 for validation with robust performance comparable to centralized training  \autoref{fig:MeshFL-Performance}.
 
-![MeshFL Training Performance.](MeshFL-Performanc.png){ width=80% }
+![MeshFL Training Performance.](MeshFL-Performance.png){ width=80% }
 
 # Code Availability
 
