@@ -44,7 +44,7 @@ MeshFL provides an easy-to-use yet robust environment for researchers and clinic
 
 MeshFL leverages NVFlare to implement federated learning workflows, allowing local sites to independently train the MeshNet model on their data and exchange model updates with a central server as shown in \autoref{fig:MeshFL-Seq-Diagram}. 
 
-![MeshFL Sequence Diagram.](MeshFL-Seq-Diagram.png){ width=60% }
+![MeshFL Sequence Diagram.\label{fig:MeshFL-Seq-Diagram}](MeshFL-Seq-Diagram.png){ width=60% }
 
 MeshFL key features include:
 
@@ -69,11 +69,11 @@ The performance of MeshFL was validated using the Mindboggle dataset [@mindboggl
 
 Results demonstrated that MeshFL achieved Dice scores of ~0.92 for training and ~0.9 for validation with robust performance comparable to centralized training  \autoref{fig:MeshFL-Performance}.
 
-![MeshFL Training Performance.](MeshFL-Performance.png){ width=80% }
+![MeshFL Training Performance.\label{fig:MeshFL-Performance}](MeshFL-Performance.png){ width=100% }
 
 # Code Availability
 
-MeshFL is openly available on GitHub at [https://github.com/Mmasoud1/MeshFL](https://github.com/Mmasoud1/MeshFL). The repository includes comprehensive documentation, example scripts, and a wiki to guide users through installation and usage. Researchers can reproduce the experiments described here or adapt MeshFL for their applications.
+MeshFL is openly available on GitHub at [https://github.com/Mmasoud1/MeshFL](https://github.com/Mmasoud1/MeshFL). The repository includes documentation, example scripts, and a wiki to guide users through installation and usage. Researchers can reproduce the experiments described here or adapt MeshFL for their applications.
 
 # Author Contributions
 
