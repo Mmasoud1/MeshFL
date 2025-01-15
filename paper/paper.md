@@ -13,12 +13,12 @@ authors:
     - name: Pratyush Reddy
       orcid: 0009-0001-9895-5176
       affiliation: 1       
-    - name: Sergey Plis
-      orcid: 0000-0003-0040-0365
-      affiliation: "1, 2"
     - name: Sandeep Panta
       orcid: 0009-0004-5092-0988
       affiliation: 1     
+    - name: Sergey Plis
+      orcid: 0000-0003-0040-0365
+      affiliation: "1, 2"      
 affiliations:
   - name: Tri-institutional Center for Translational Research in Neuroimaging and Data Science (TReNDS), Georgia State University, Georgia Institute of Technology, Emory University, Atlanta, United States of America
     index: 1
@@ -34,7 +34,7 @@ Advances in federated learning paved the way for privacy-preserving collaborativ
 
 # Statement of Need
 
-In neuroimaging, collaborative machine learning is often hindered by the sensitive nature of patient data and the computational demands of training large 3D models. Traditional centralized learning approaches require aggregating data in one location, which is impractical for datasets governed by strict privacy laws. Federated learning addresses this limitation by enabling model training without sharing raw data between sites [@mcmahan2017communication, @rieke2020future].
+In neuroimaging, collaborative machine learning is often hindered by the sensitive nature of patient data and the computational demands of training large 3D models. Traditional centralized learning approaches require aggregating data in one location, which is impractical for datasets governed by strict privacy laws. Federated learning addresses this limitation by enabling model training without sharing raw data between sites [@mcmahan2017communication],[ @rieke2020future].
 
 The model choice is determined by the need to limit the bandwidth and reduce the possibility of data leakage through the gradients shared during training. MeshNet's parameter size in our use case is 22.2 KB, making it a lightweight and efficient choice for federated learning.
 
