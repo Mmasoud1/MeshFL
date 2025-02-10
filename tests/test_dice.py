@@ -1,6 +1,6 @@
 import pytest
 import torch
-from app.code.executor.dice import dice, faster_dice
+from ..app.code.executor.dice import dice, faster_dice
 
 def test_dice_identical_arrays():
     """
