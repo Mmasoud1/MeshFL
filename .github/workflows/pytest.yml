@@ -2,9 +2,10 @@ name: Run Tests with pytest
 
 # Trigger the workflow on pull request events
 on:
+  push:
+    branches: [main]
   pull_request:
-    branches:
-      - main  
+    branches: [main]
 
 jobs:
   test:
