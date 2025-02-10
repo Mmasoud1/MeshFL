@@ -62,7 +62,7 @@ We also request that significant contributions to derivative works be recognized
 
 ## Funding
 
-MeshFL release V1.0.0 was funded by the NIH grant xx    
+MeshFL release V1.0.0 was funded by the NIH grant R01DA040487.    
 
 <br />
 
