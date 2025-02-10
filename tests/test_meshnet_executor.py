@@ -7,6 +7,20 @@ import sqlite3
 import zlib
 import numpy as np
 
+import torch.optim.lr_scheduler
+
+class DummyOneCycleLR:
+    def __init__(self, optimizer, **kwargs):
+        self.optimizer = optimizer
+        self.total_steps = kwargs.get('total_steps', 1)
+    def step(self):
+        pass
+    def get_last_lr(self):
+        return [group['lr'] for group in self.optimizer.param_groups]
+
+# Override the OneCycleLR scheduler with the dummy version.
+torch.optim.lr_scheduler.OneCycleLR = DummyOneCycleLR
+
 # Create dummy implementations for FLContext, Shareable, and Signal.
 class DummyFLContext:
     def get_prop(self, key):
