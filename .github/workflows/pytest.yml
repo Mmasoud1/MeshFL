@@ -35,9 +35,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install your package in editable mode
-        run: |
-          pip install -e .
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=${PYTHONPATH}:$(pwd)" >> $GITHUB_ENV
 
       - name: Run tests with pytest
         run: |
