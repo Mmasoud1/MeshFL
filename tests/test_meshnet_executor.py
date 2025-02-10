@@ -84,8 +84,9 @@ def patch_executor_paths(monkeypatch, dummy_files):
     cursor.execute("CREATE TABLE mindboggle101 (Image BLOB, GWlabels BLOB)")
     # Insert a single dummy row.
     # create a dummy array of shape (256, 256, 256) for both image and label.
-    dummy_image = np.zeros((256, 256, 256), dtype=np.float32)
-    dummy_label = np.zeros((256, 256, 256), dtype=np.float32)
+    # Insert a single row with a tiny tensor (e.g., 8x8x8 instead of 256x256x256):
+    dummy_image = np.zeros((8, 8, 8), dtype=np.float32)
+    dummy_label = np.zeros((8, 8, 8), dtype=np.float32)
     blob_image = zlib.compress(dummy_image.tobytes())
     blob_label = zlib.compress(dummy_label.tobytes())
     cursor.execute("INSERT INTO mindboggle101 (Image, GWlabels) VALUES (?, ?)", (blob_image, blob_label))
