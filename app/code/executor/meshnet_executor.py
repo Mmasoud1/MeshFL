@@ -52,16 +52,6 @@ class MeshNetExecutor(Executor):
         self.model.to(self.device)
 
 
-        # # Check if the class variable initial_weights is None  ( Failded becasue both sites give copy)
-        # if MeshNetExecutor.initial_weights is None:
-        #     # If this is the first site, store the model's initial weights
-        #     MeshNetExecutor.initial_weights = {key: value.clone() for key, value in self.model.state_dict().items()}
-        #     self.logger.log_message(f"Initial weights copied from this site")
-        # else:
-        #     # If weights have already been initialized, load them into this site's model
-        #     self.model.load_state_dict(MeshNetExecutor.initial_weights)
-        #     self.logger.log_message(f"Initial weights assigned to this site.")
-
 
         # Define the file path for the weights   
         initial_weights_file_path = os.path.join(os.path.dirname(__file__), "initial_weights.pth") 
@@ -141,18 +131,6 @@ class MeshNetExecutor(Executor):
 
 
 
-
-    # def set_seed(self, seed):
-    #     # Set the random seed for reproducibility
-    #     random.seed(seed)
-    #     np.random.seed(seed)
-    #     torch.manual_seed(seed)
-    #     if torch.cuda.is_available():
-    #         torch.cuda.manual_seed(seed)
-    #         torch.cuda.manual_seed_all(seed)
-    #     torch.backends.cudnn.deterministic = True  # Ensure deterministic behavior
-    #     torch.backends.cudnn.benchmark = False
-
     def execute(
         self,
         task_name: str,
@@ -163,21 +141,7 @@ class MeshNetExecutor(Executor):
         
         # Get site name
         self.site_name = fl_ctx.get_prop(FLContextKey.CLIENT_NAME)
-
-
-        # Check for initial model broadcast 
-        # (((( FOR FUTUR USE))))  as practicall solution to share init weights between sites at begining. 
-        # if task_name == "initialize_model":
-        #     self.logger.log_message(f"{self.site_name}-initialize_model weights called")
-        #     model_weights = shareable["model_weights"]
-        #     self.load_model_weights(model_weights)
-        #     return Shareable()
-
-        # if "initial_weights" in shareable:
-        #     self.logger.log_message(f"{self.site_name} - Received initial weights from the server.")
-        #     initial_weights = shareable["initial_weights"]
-        #     self.model.load_state_dict(initial_weights)  # Load the initial weights
-        #     return Shareable()  # Acknowledge receipt        
+  
 
 
         # Initialize data loader and other site-specific configurations once
@@ -232,160 +196,7 @@ class MeshNetExecutor(Executor):
             self.apply_gradients(aggregated_gradients, fl_ctx)
             return Shareable()
 
-
-
-    # def train_and_get_gradients_old(self, fl_ctx):
-    #     # Set the model to training mode, so dropout is activated
-    #     # and BatchNorm normalizes the input based on the statistics of the current mini-batch.
-    #     self.model.train()
-
-    #     # Initialize accumulators for the loss and gradients
-    #     total_loss = 0.0
-
-    
-
-    #     # Training loop for one epoch (full pass through the dataset)
-
-    #     for batch_id, (image, label) in enumerate(self.trainloader):
-
-    #         # Moving data to the correct device (CPU or GPU)
-    #         image, label = image.to(self.device), label.to(self.device)
-
-    #         self.optimizer.zero_grad() #  It resets/clears the gradients of all model parameters (i.e., weights).
-    #         # PyTorch by defualt adds new gradients to any existing gradients, to prevent this accumulation of gradients 
-    #         # from previous iterations, manually set them to zero at the beginning of each new training iteration.
-
-
-    #         # Mixed precision and checkpointing
-    #         with torch.amp.autocast(device_type='cuda'):
-    #             # Forward passing input data through the model to get predictions, start training
-                
-    #             # reshape the 3D image tensor into a 5D tensor with the shape [batch_size, channels, depth, height, width].
-    #             # -1: The batch size dimension is inferred.
-    #             #  1: This indicates a single channel (grayscale MRI image).
-    #             output = torch.utils.checkpoint.checkpoint(self.model, image.reshape(-1, 1, self.shape, self.shape, self.shape), use_reentrant=False)
-
-    #             labels = torch.squeeze(label)  # Squeeze the label
-    #             # Training label shape: torch.Size([1, 256, 256, 256])
-    #             # Squeeze labels shape : [ 256, 256, 256]
-
-    #             labels = (labels * 2).round().long()  # Multiply by 2, round the values, and cast to long
-
-
-    #             # Log the shapes and unique values of the image and label once
-    #             if self.log_image_label_shapes_once:
-    #                 # Log image and label shapes
-    #                 self.logger.log_message(f"Training image shape: {image.shape}")
-    #                 # Training image shape: torch.Size([1, 256, 256, 256])
-
-    #                 self.logger.log_message(f"Training label shape: {label.shape}")
-    #                 # Training label shape: torch.Size([1, 256, 256, 256])
-
-    #                 self.logger.log_message(f"Training output shape: {output.shape}")
-    #                 #  Training output shape: torch.Size([1, 3, 256, 256, 256])
-                    
-    #                 # Log the unique values in both image and label
-    #                 unique_label = torch.unique(label)
-    #                 unique_labels = torch.unique(labels)
-    #                 self.logger.log_message(f"Unique values in training GT label: {unique_label.tolist()}")
-    #                 #  Unique values in training label: [0.0, 0.5, 1.0]    <<<<<<<<<<<<<<<<< Normalized by Pratyush
-                    
-    #                 self.logger.log_message(f"Unique values in training sequeezed long scaled labels: {unique_labels.tolist()}")
-    #                 #  Unique values in training label: [0, 1, 2]   
-
-    #                 self.log_image_label_shapes_once = False  # Set to False so this is only logged once                
-
-    #             # compute the loss between the predicted output and the ground truth labels
-    #             # The label tensor is reshaped to [batch_size, depth, height, width] to match the output shape of the model.
-    #             # .long() * 2: Double the label values. Looks like Pratyush made it 0, 0.5, 1 range. 
-
-    #             #  For CrossEntropyLoss, the input (predictions) should have 
-    #             #  shape [batch_size, num_classes, height, width, depth] (as the output does),
-    #             #  while the target (label) should have shape [batch_size, height, width, depth] containing class indices as integers.                
-
-
-
-    #             loss = self.criterion(output, labels.reshape(-1, self.shape, self.shape, self.shape))
-
-
-    #         # Accumulate loss
-    #         total_loss += loss.item()
-
-    #         # Scale loss and backward pass
-    #         # self.scaler.scale(loss).backward()
-
-    #         # Scale loss and backward pass (Backpropagation)
-    #         # Backward pass (gradient calculation): Calculate the gradients for all the model's parameters with respect to the loss:
-    #         loss.backward() #  calculate gradients
-
-    #         self.optimizer.step() # gradients are applied to the model parameters 
-    #         # Training done for that round.   
-
-    #         # Update the learning rate 
-    #         self.scheduler.step()
-
-    #         # Get the current learning rate
-    #         current_lr = self.optimizer.param_groups[0]['lr']
-
-    #         # Check if the learning rate has changed, and log it if so
-    #         if current_lr != self.previous_lr:
-    #             self.logger.log_message(f"Learning rate changed from {self.previous_lr} to: {current_lr}")
-    #             self.previous_lr = current_lr  # Update the previous learning rate
-
-
-    #         # # Accumulate gradients without updating yet
-    #         # if (batch_id + 1) % self.gradient_accumulation_steps == 0:
-    #         #     # Update optimizer
-    #         #     self.scaler.step(self.optimizer)
-    #         #     self.scaler.update()
-    #         #     self.optimizer.zero_grad()
-
-
-    #     # Clear GPU cache (No need)
-    #     # torch.cuda.empty_cache()
-
-    #     # Log the average loss and Dice score per epoch
-    #     average_loss = total_loss / len(self.trainloader)
-
-    #     # dice_score = self.calculate_dice(self.trainloader)
-    #     # Calculate Dice score on the validation set
-    #     # self.model.eval()  # Set the model to evaluation mode for validation
-    #     dice_score = self.calculate_dice(self.validloader, fl_ctx)  # Use validation set        
-    #     self.logger.log_message(f"{self.site_name} - Epoch {self.current_epoch}: Loss = {average_loss}, Val Dice = {dice_score}")
-
-
-
-    #     # Check for early stopping           <<<<<<<<<<<<<<<<<<  (Overlooked for now)
-    #     # if average_loss < self.best_loss:
-    #     #     self.best_loss = average_loss
-    #     #     self.epochs_without_improvement = 0
-    #     # else:
-    #     #     self.epochs_without_improvement += 1
-
-    #     # if self.epochs_without_improvement >= self.early_stopping_patience:
-    #     #     self.logger.log_message(f"Early stopping triggered at epoch {self.current_epoch}")
-    #     #     return []
-
-    #     self.logger.log_message(f"{self.site_name} Preparing payload after an iteration in epoch {self.current_epoch}")
-    #     # return [grad.clone().cpu().numpy() for grad in gradient_accumulator if grad is not None]
-
-    #     # Accumulate gradients
-    #     gradients = []
-    #     for i, param in enumerate(self.model.parameters()):
-    #         if param.grad is not None:
-    #             gradients.append(param.grad.clone().cpu().numpy())
-        
-
-    #     # for example :
-    #     # gradients = [
-    #     #     array([[ 0.01, -0.02], [ 0.03,  0.04]]),  # gradient for some weight matrix (e.g shape [2, 2])
-    #     #     array([0.005, -0.015]),                   # gradient for some bias vector (e.g shape [2])
-    #     #     array([[ 0.02, 0.01], [-0.03, 0.05]])     # Another gradient for a different weight matrix and so on.
-    #     # ]
-
-
-
-    #     return gradients        
+   
 
 
     # Define functions to save and load checkpoints
