@@ -726,7 +726,10 @@ class MeshNetExecutor(Executor):
         for param, avg_grad in zip(self.model.parameters(), aggregated_gradients):
             if param.requires_grad:
                 avg_grad = torch.tensor(avg_grad).to(param.device)
-                avg_grad = avg_grad.to(param.grad.dtype)
+                if param.grad is not None:
+                    avg_grad = avg_grad.to(param.grad.dtype)
+                else:
+                    avg_grad = avg_grad.to(param.dtype)
                 param.grad = avg_grad
 
         # Update model parameters based on the applied gradients
