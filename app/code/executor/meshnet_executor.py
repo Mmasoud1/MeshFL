@@ -44,7 +44,16 @@ class MeshNetExecutor(Executor):
         # Check if GPU available
         # GPU assignment
         os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # Set GPU ID explicitly
-        os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
+
+
+        # Optional CUDA allocator setting for environments that experience
+        # memory fragmentation. Disabled by default; enable with:
+        #   export MESHFL_EXPANDABLE_SEGMENTS=1      #<<<<<<<
+        if os.getenv("MESHFL_EXPANDABLE_SEGMENTS", "0") == "1":
+            os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+            self.logger.log_message(
+                "Enabled PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
+            )
         # Set the environment variable PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to help PyTorch handle fragmented memory
         # This env var helps in avoid cuda out of memory message. MeshNetExecutor: OutOfMemoryError: CUDA out of memory.
 
@@ -66,7 +75,10 @@ class MeshNetExecutor(Executor):
         else:
             # Save initial weights to file (first site)
             torch.save(self.model.state_dict(), initial_weights_file_path)
-            self.logger.log_message(f"Initial weights saved to file for this site.")        
+            self.logger.log_message(f"Initial weights saved to file for this site.")
+
+
+            
 
 
         # Ensure model parameters require gradients
