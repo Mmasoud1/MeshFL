@@ -42,7 +42,8 @@ To start MeshFL, please refer to this steps <b><a href="https://github.com/Mmaso
 
 A complete demonstration of MeshFL training and inference is available:
 
-[Demo Notebook](examples/MeshFL_Demo.ipynb)
+[Demo Notebook](Examples/MeshFL_Demo.ipynb)
+
 [Run on Colab](https://colab.research.google.com/drive/18xjmBMR7EhuFVyhqhHuoGoCLJUuCwUA2?usp=sharing)
 
 This demo uses **150 training rounds** for faster execution. For improved performance, increasing training rounds (e.g., 300–350) can yield Dice scores above 0.93.
