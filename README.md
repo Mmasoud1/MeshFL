@@ -1,4 +1,4 @@
-# MeshFL [![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen)]() [![MIT-License ](https://img.shields.io/badge/license-MIT-green)](https://github.com/Mmasoud1/MeshFL/blob/main/LICENSE) [![PyTorch](https://img.shields.io/badge/PyTorch-Trained%20Model-blue)]()
+# MeshFL [![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen)]() [![MIT-License ](https://img.shields.io/badge/license-MIT-green)](https://github.com/Mmasoud1/MeshFL/blob/main/LICENSE) [![PyTorch](https://img.shields.io/badge/PyTorch-Trained%20Model-blue)]() [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/18xjmBMR7EhuFVyhqhHuoGoCLJUuCwUA2?usp=sharing)
 
 <div align="center">
 
@@ -38,6 +38,19 @@
 ## Getting Started
 To start MeshFL, please refer to this steps <b><a href="https://github.com/Mmasoud1/MeshFL/wiki/Setup"  style="text-decoration: none">here</a></b>
 
+## Demo
+
+A complete demonstration of MeshFL training and inference is available:
+
+[Demo Notebook](examples/MeshFL_Demo.ipynb)
+[Run on Colab](https://colab.research.google.com/drive/18xjmBMR7EhuFVyhqhHuoGoCLJUuCwUA2?usp=sharing)
+
+This demo uses **150 training rounds** for faster execution. For improved performance, increasing training rounds (e.g., 300–350) can yield Dice scores above 0.93.
+
+The demo includes:
+- Training convergence visualization for 150 training rounds.
+- Learning rate scheduling
+- Final segmentation results
 
 ## Updates
 
