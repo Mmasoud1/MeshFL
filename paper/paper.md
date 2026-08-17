@@ -1,5 +1,5 @@
 ---
-title: 'MeshFL: A Decentralized MeshNet Framework for 3D Brain MRI Segmentation'
+title: 'MeshFL: A Federated MeshNet Framework for 3D Brain MRI Segmentation'
 tags:
     - Federated Learning
     - Distributed Machine Learning
@@ -30,11 +30,11 @@ bibliography: paper.bib
 
 # Summary
 
-Advances in federated learning paved the way for privacy-preserving collaborative training of machine learning models on decentralized datasets. This is particularly useful in neuroimaging, where sensitive data, such as brain MRI scans, cannot be easily shared across institutions. MeshFL [@meshfl_repo] is an open-source framework designed to facilitate distributed training of deep learning models for 3D brain MRI segmentation while maintaining data privacy. Built upon NVFlare [@nvflare], MeshFL employs federated learning principles to train MeshNet models [@Fedorov:2017] across multiple data sites, enabling high-accuracy segmentation of white and gray matter regions. With Dice scores of ~0.92 for training and ~0.9 for validation, MeshFL demonstrates that decentralized training can achieve performance comparable to centralized setups.
+Advances in federated learning paved the way for privacy-preserving collaborative training of machine learning models on decentralized datasets. This is particularly useful in neuroimaging, where sensitive data, such as brain MRI scans, cannot be easily shared across institutions. MeshFL is an open-source framework designed to facilitate distributed training of deep learning models for 3D brain MRI segmentation while maintaining data privacy. Built upon NVFlare [@nvflare], MeshFL employs federated learning principles to train MeshNet models [@Fedorov:2017] across multiple data sites, enabling high-accuracy segmentation of white and gray matter regions. With Dice scores of approximately 0.92 for training and  approximately  0.9 for validation, MeshFL demonstrates that decentralized training can achieve performance comparable to centralized setups.
 
 # Statement of Need
 
-In neuroimaging, collaborative machine learning is often hindered by the sensitive nature of patient data and the computational demands of training large 3D models. Traditional centralized learning approaches require aggregating data in one location, which is impractical for datasets governed by strict privacy laws. Federated learning addresses this limitation by enabling model training without sharing raw data between sites [@mcmahan2017communication],[ @rieke2020future].
+In neuroimaging, collaborative machine learning is often hindered by the sensitive nature of patient data and the computational demands of training large 3D models. Traditional centralized learning approaches require aggregating data in one location, which is impractical for datasets governed by strict privacy laws. Federated learning addresses this limitation by enabling model training without sharing raw data between sites [@mcmahan2017communication;  @rieke2020future].
 
 The model choice is determined by the need to limit the bandwidth and reduce the possibility of data leakage through the gradients shared during training. MeshNet's parameter size in our use case is 22.2 KB, making it a lightweight and efficient choice for federated learning.
 
@@ -53,13 +53,13 @@ MeshFL leverages NVFlare to implement federated learning workflows, allowing loc
 
 ![MeshFL Sequence Diagram.\label{fig:MeshFL-Seq-Diagram}](MeshFL-Seq-Diagram.png){ width=60% }
 
-MeshFL key features include:
+Key features of MeshFL include:
 
 - **Data Preprocessing:** Automated partitioning of MRI scans into training, validation, and testing sets.
 
 - **Model Training:** The framework utilizes PyTorch for implementing the MeshNet model and optimizing memory usage. Layer checkpointing further reduces memory overhead during training.
 
-- **Aggregation Strategies:** Federated averaging of model weights, where the global model is updated by computing the average of the local weights contributed by each site. Initial model weights are shared across sites for consistent training initialization.
+- **Aggregation Strategies:** MeshFL supports federated averaging of model weights, in which the global model is updated by averaging local weights contributed by each site. Initial model weights are shared across sites to provide consistent training initialization.
 
 - **Custom Logger:** MeshFL includes a GenericLogger for detailed logging of training progress, gradient application, and Dice score evaluations.
 
@@ -72,9 +72,9 @@ MeshFL also integrates a learning rate scheduler to enhance training stability. 
 
 # Validation
 
-The performance of MeshFL was validated using the Mindboggle dataset [@mindboggle] on 15 MRI samples labeled for white and gray matter segmentation. Using Dice coefficient as the evaluation metric and CrossEntropy for loss calculation, MeshFL achieved comparable accuracy to centralized training setups while adhering to federated learning constraints. Benchmarks were conducted with uniformly distributed data across sites, ensuring each site received an equal number of samples for training and validation.
+The performance of MeshFL was validated using the Mindboggle dataset [@mindboggle] on 15 MRI samples labeled for white and gray matter segmentation. Using Dice coefficient as the evaluation metric and cross-entropy loss, MeshFL achieved comparable accuracy to centralized training setups while adhering to federated learning constraints. Benchmarks were conducted with uniformly distributed data across sites, ensuring each site received an equal number of samples for training and validation.
 
-Results demonstrated that MeshFL achieved Dice scores of ~0.92 for training and ~0.9 for validation with robust performance comparable to centralized training  \autoref{fig:MeshFL-Performance}. 
+Results demonstrated that MeshFL achieved Dice scores of approximately 0.92 for training and approximately 0.9 for validation, demonstrating effective segmentation performance under the federated training configuration, as shown in  \autoref{fig:MeshFL-Performance}. 
 
 ![MeshFL Training Performance.\label{fig:MeshFL-Performance}](MeshFL-Performance.png){ width=100% }
 
