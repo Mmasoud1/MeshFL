@@ -30,7 +30,7 @@ bibliography: paper.bib
 
 # Summary
 
-Advances in federated learning paved the way for privacy-preserving collaborative training of machine learning models on decentralized datasets. This is particularly useful in neuroimaging, where sensitive data, such as brain MRI scans, cannot be easily shared across institutions. MeshFL is an open-source framework designed to facilitate distributed training of deep learning models for 3D brain MRI segmentation while maintaining data privacy. Built upon NVFlare [@nvflare], MeshFL employs federated learning principles to train MeshNet models [@Fedorov:2017] across multiple data sites, enabling high-accuracy segmentation of white and gray matter regions. With Dice scores of approximately 0.92 for training and  approximately  0.9 for validation, MeshFL demonstrates effective 3D brain MRI segmentation under the federated training configuration.
+Advances in federated learning paved the way for privacy-preserving collaborative training of machine learning models on decentralized datasets. This is particularly useful in neuroimaging, where sensitive data, such as brain MRI scans, cannot be easily shared across institutions. MeshFL is an open-source framework designed to facilitate distributed training of deep learning models for 3D brain MRI segmentation while maintaining data privacy. Built upon NVFlare [@nvflare], MeshFL employs federated learning principles to train MeshNet models [@Fedorov:2017] across multiple data sites, enabling high-accuracy segmentation of white and gray matter regions. With Dice scores of approximately 0.92 for training and  approximately  0.90 for validation, MeshFL demonstrates effective 3D brain MRI segmentation under the federated training configuration.
 
 # Statement of Need
 
@@ -74,7 +74,7 @@ MeshFL also integrates a learning rate scheduler to enhance training stability. 
 
 The performance of MeshFL was validated using the Mindboggle dataset [@mindboggle] on 15 MRI samples labeled for white and gray matter segmentation. The federated simulation consisted of two sites, each using a local copy of the same 15-subject dataset. At each site, 11 subjects were used for training, 2 for validation, and 2 for testing, with the same split used across both sites. Training samples were shuffled within each local training loader, while the validation and test subsets remained fixed. Using the Dice coefficient as the evaluation metric and cross-entropy loss for training, MeshFL demonstrated effective segmentation performance under the federated training configuration.
 
-Results demonstrated that MeshFL achieved Dice scores of approximately 0.92 for training and approximately 0.9 for validation, as shown in  \autoref{fig:MeshFL-Performance}. 
+Results demonstrated that MeshFL achieved Dice scores of approximately 0.92 for training and approximately 0.90 for validation, as shown in  \autoref{fig:MeshFL-Performance}. 
 
 ![MeshFL Training Performance.\label{fig:MeshFL-Performance}](MeshFL-Performance.png){ width=100% }
 
