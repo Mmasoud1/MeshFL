@@ -36,7 +36,7 @@ Advances in federated learning paved the way for privacy-preserving collaborativ
 
 In neuroimaging, collaborative machine learning is often hindered by the sensitive nature of patient data and the computational demands of training large 3D models. Traditional centralized learning approaches require aggregating data in one location, which is impractical for datasets governed by strict privacy laws. Federated learning addresses this limitation by enabling model training without sharing raw data between sites [@mcmahan2017communication;  @rieke2020future].
 
-The model choice is determined by the need to limit the bandwidth and reduce the possibility of data leakage through the gradients shared during training. MeshNet's parameter size in our use case is 22.2 KB, making it a lightweight and efficient choice for federated learning.
+The model choice is determined by the need to limit the bandwidth and reduce the risk of data leakage through the gradients shared during training. MeshNet is particularly suitable for this setting because of its compact architecture; in our current configuration, the model contains 5,688 trainable parameters with a raw parameter memory footprint of approximately 22.2 KiB.
 
 Existing federated learning frameworks often lack specific adaptations for neuroimaging tasks. MeshFL fills this gap by offering:
 
@@ -72,9 +72,9 @@ MeshFL also integrates a learning rate scheduler to enhance training stability. 
 
 # Validation
 
-The performance of MeshFL was validated using the Mindboggle dataset [@mindboggle] on 15 MRI samples labeled for white and gray matter segmentation. Using Dice coefficient as the evaluation metric and cross-entropy loss, MeshFL achieved comparable accuracy to centralized training setups while adhering to federated learning constraints. Benchmarks were conducted with uniformly distributed data across sites, ensuring each site received an equal number of samples for training and validation.
+The performance of MeshFL was validated using the Mindboggle dataset [@mindboggle] on 15 MRI samples labeled for white and gray matter segmentation. The federated simulation consisted of two sites, each using a local copy of the same 15-subject dataset. At each site, 11 subjects were used for training, 2 for validation, and 2 for testing, with the same split used across both sites. Training samples were shuffled within each local training loader, while the validation and test subsets remained fixed. Using the Dice coefficient as the evaluation metric and cross-entropy loss for training, MeshFL demonstrated effective segmentation performance under the federated training configuration.
 
-Results demonstrated that MeshFL achieved Dice scores of approximately 0.92 for training and approximately 0.9 for validation, demonstrating effective segmentation performance under the federated training configuration, as shown in  \autoref{fig:MeshFL-Performance}. 
+Results demonstrated that MeshFL achieved Dice scores of approximately 0.92 for training and approximately 0.9 for validation, as shown in  \autoref{fig:MeshFL-Performance}. 
 
 ![MeshFL Training Performance.\label{fig:MeshFL-Performance}](MeshFL-Performance.png){ width=100% }
 
