@@ -36,7 +36,7 @@ Advances in federated learning paved the way for privacy-preserving collaborativ
 
 In neuroimaging, collaborative machine learning is often hindered by the sensitive nature of patient data and the computational demands of training large 3D models. Traditional centralized learning approaches require aggregating data in one location, which is impractical for datasets governed by strict privacy laws. Federated learning addresses this limitation by enabling model training without sharing raw data between sites [@mcmahan2017communication;  @rieke2020future].
 
-The model choice is determined by the need to limit the bandwidth and reduce the risk of data leakage through the gradients shared during training. MeshNet is particularly suitable for this setting because of its compact architecture; in our current configuration, the model contains 5,688 trainable parameters with a raw parameter memory footprint of approximately 22.2 KiB.
+The choice of model was driven by the need to reduce bandwidth use and lower the risk of data leakage through shared gradient updates. MeshNet is particularly suitable for this setting because of its compact architecture; in our current configuration, the model contains 5,688 trainable parameters with a raw parameter memory footprint of approximately 22.2 KiB.
 
 Existing federated learning frameworks often lack specific adaptations for neuroimaging tasks. MeshFL fills this gap by offering:
 
