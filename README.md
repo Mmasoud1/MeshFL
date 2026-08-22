@@ -1,4 +1,4 @@
-# MeshFL [![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen)]() [![MIT-License ](https://img.shields.io/badge/license-MIT-green)](https://github.com/Mmasoud1/MeshFL/blob/main/LICENSE) [![PyTorch](https://img.shields.io/badge/PyTorch-Trained%20Model-blue)]() [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/18xjmBMR7EhuFVyhqhHuoGoCLJUuCwUA2?usp=sharing)
+# MeshFL [![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen)]() [![MIT-License](https://img.shields.io/badge/license-MIT-green)](https://github.com/Mmasoud1/MeshFL/blob/main/LICENSE) [![PyTorch](https://img.shields.io/badge/PyTorch-Trained%20Model-blue)]() [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/18xjmBMR7EhuFVyhqhHuoGoCLJUuCwUA2?usp=sharing) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22062794.svg)](https://doi.org/10.5281/zenodo.22062794)
 
 <div align="center">
 
