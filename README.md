@@ -1,4 +1,4 @@
-# MeshFL [![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen)]() [![MIT-License](https://img.shields.io/badge/license-MIT-green)](https://github.com/Mmasoud1/MeshFL/blob/main/LICENSE) [![PyTorch](https://img.shields.io/badge/PyTorch-Trained%20Model-blue)]() [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/18xjmBMR7EhuFVyhqhHuoGoCLJUuCwUA2?usp=sharing) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22062794.svg)](https://doi.org/10.5281/zenodo.22062794)
+# MeshFL [![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen)]() [![MIT-License](https://img.shields.io/badge/license-MIT-green)](https://github.com/Mmasoud1/MeshFL/blob/main/LICENSE) [![PyTorch](https://img.shields.io/badge/PyTorch-Trained%20Model-blue)]() [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/18xjmBMR7EhuFVyhqhHuoGoCLJUuCwUA2?usp=sharing) [![JOSS](https://joss.theoj.org/papers/10.21105/joss.09357/status.svg)](https://doi.org/10.21105/joss.09357)
 
 <div align="center">
 
@@ -55,9 +55,52 @@ The demo includes:
 
 ## Updates
 
-* MeshFL <a href= "https://github.com/Mmasoud1/MeshFL/releases/tag/v1.0.0" target="_blank"  style="text-decoration: none"> v1.0.0 </a> has been released
+* MeshFL <a href= "https://github.com/Mmasoud1/MeshFL/releases/tag/v2.0.0" target="_blank"  style="text-decoration: none"> v2.0.0 </a> has been released
 
 ## News!
+
+* MeshFL [paper](https://joss.theoj.org/papers/10.21105/joss.09357) was published in the **Journal of Open Source Software (JOSS)** on **August 26, 2026**.
+
+<div align="center">
+   <a href="https://joss.theoj.org/papers/10.21105/joss.09357">
+      <img src="https://github.com/Mmasoud1/HistoJS/blob/main/Demo/News/JOSS_Logo.png">
+   </a>
+</div>
+
+<br>
+
+## Citation
+
+The MeshFL [paper](https://joss.theoj.org/papers/10.21105/joss.09357), corresponding to **MeshFL v2.0.0**, was published on **August 26, 2026** in the *Journal of Open Source Software (JOSS)*:
+
+[![JOSS DOI](https://joss.theoj.org/papers/10.21105/joss.09357/status.svg)](https://doi.org/10.21105/joss.09357)
+
+<br>
+
+For **APA** style, please cite the paper as:
+
+> Masoud, M., Reddy, P., Panta, S., & Plis, S. (2026). MeshFL: A Federated MeshNet Framework for 3D Brain MRI Segmentation. *Journal of Open Source Software, 11*(124), 9357. https://doi.org/10.21105/joss.09357
+
+<br>
+
+For **BibTeX**:
+
+```bibtex
+@article{Masoud2026,
+  doi = {10.21105/joss.09357},
+  url = {https://doi.org/10.21105/joss.09357},
+  year = {2026},
+  publisher = {The Open Journal},
+  volume = {11},
+  number = {124},
+  pages = {9357},
+  author = {Masoud, Mohamed and Reddy, Pratyush and Panta, Sandeep and Plis, Sergey},
+  title = {MeshFL: A Federated MeshNet Framework for 3D Brain MRI Segmentation},
+  journal = {Journal of Open Source Software}
+}
+```
+<br>
+
 
 ## Contributions and Authorship Guidelines
 
